@@ -2,6 +2,8 @@ import requests
 import threading
 import concurrent.futures
 import multiprocessing
+import re
+from collections import Counter
 
 #Функция, которая параллельно загружает несколько изображений с удаленного сервера и сохраняет их на локальном диске.
 def download_image(url, file_name):
@@ -217,3 +219,206 @@ print("Завершение программы")
 #В этом примере мы используем модуль multiprocessing для создания пула процессов. Функция calculate_formula принимает сложную математическую формулу, вычисляет ее с помощью функции eval и выводит результат.
 # Мы создаем список formulas, в котором содержатся сложные математические формулы для вычисления.Затем мы создаем пул процессов с помощью Pool. Внутри контекста пула процессов мы используем метод map, чтобы параллельно применить функцию calculate_formula ко всем формулам в списке formulas.
 # Результаты будут автоматически собраны и возвращены в том же порядке.Наконец, выводится сообщение "Завершение программы".
+
+#функцию, которая параллельно обрабатывает большой объем текстовых данных, разбивая его на отдельные слова и подсчитывая частоту встречаемости каждого слова.
+
+def process_text(text):
+    # Разбиваем текст на отдельные слова с помощью регулярного выражения
+    words = re.findall(r'\w+', text.lower())
+
+    # Подсчитываем частоту встречаемости каждого слова
+    word_counts = Counter(words)
+
+    return word_counts
+
+def parallel_text_processing(text):
+    # Разбиваем текст на части для обработки параллельно
+    num_processes = multiprocessing.cpu_count()
+    chunk_size = len(text) // num_processes
+    chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
+
+    # Создаем пул процессов
+    with multiprocessing.Pool() as pool:
+        # Обрабатываем каждую часть текста параллельно
+        results = pool.map(process_text, chunks)
+
+    # Объединяем результаты подсчета частоты слов
+    final_word_counts = Counter()
+    for result in results:
+        final_word_counts += result
+
+    return final_word_counts
+
+# Пример использования
+text = """
+Python is a high-level programming language designed to be easy to read and simple to implement.
+It is open source, which means it is free to use, even for commercial purposes.
+Python can run on Mac, Windows, and Unix systems and has also been ported to Java and .NET virtual machines.
+Python is widely used in web development, scientific computing, artificial intelligence, data analysis, and more.
+"""
+
+word_counts = parallel_text_processing(text)
+print("Частота встречаемости слов:")
+for word, count in word_counts.items():
+    print(f"{word}: {count}")
+
+#В этом примере функция process_text принимает текст и разбивает его на отдельные слова с помощью регулярного выражения. Затем она подсчитывает частоту встречаемости каждого слова с использованием Counter.
+# Функция parallel_text_processing разбивает текст на части для параллельной обработки. Она создает пул процессов с помощью Pool и использует метод map, чтобы обработать каждую часть текста параллельно с помощью функции process_text. Результаты обработки объединяются в конечный объект Counter.
+# Пример использования показывает, как передать текст в функцию parallel_text_processing и получить частоту встречаемости каждого слова. Результаты выводятся на экран.
+
+
+
+#программу, которая параллельно загружает и обрабатывает данные из нескольких датчиков, выполняя различные анализы и вычисления.
+# Функция для загрузки данных из датчика
+def load_sensor_data(sensor_id):
+    # Здесь можно реализовать код для загрузки данных из датчика
+    # Возвращаем загруженные данные
+    return sensor_data
+
+
+# Функция для анализа и вычислений над данными датчика
+def analyze_sensor_data(sensor_data):
+    # Здесь можно реализовать код для анализа и вычислений над данными датчика
+    # Возвращаем результат анализа и вычислений
+    return result
+
+
+# Главная функция программы
+def main():
+    # Список идентификаторов датчиков
+    sensor_ids = [1, 2, 3, 4, 5]
+
+    # Создаем пул потоков для параллельной обработки данных
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Загружаем данные из каждого датчика параллельно
+        sensor_data_futures = {executor.submit(load_sensor_data, sensor_id): sensor_id for sensor_id in sensor_ids}
+
+        # Обрабатываем данные каждого датчика параллельно
+        results = {executor.submit(analyze_sensor_data, sensor_data): sensor_id for future, sensor_id in
+                   sensor_data_futures.items()}
+
+        # Получаем результаты анализа и вычислений для каждого датчика
+        for future in concurrent.futures.as_completed(results):
+            sensor_id = results[future]
+            try:
+                result = future.result()
+                print(f"Результаты для датчика {sensor_id}: {result}")
+            except Exception as e:
+                print(f"Ошибка при обработке данных датчика {sensor_id}: {e}")
+
+
+# Запускаем главную функцию
+if __name__ == '__main__':
+    main()
+
+#В этом примере функция load_sensor_data отвечает за загрузку данных из датчика с указанным идентификатором (sensor_id). Здесь можно реализовать соответствующую логику для загрузки данных из датчика.
+# Функция analyze_sensor_data принимает данные датчика (sensor_data) и выполняет анализ и вычисления над ними. Здесь можно реализовать нужные операции, соответствующие вашим требованиям.
+# Главная функция main создает пул потоков ThreadPoolExecutor, который используется для параллельной обработки данных из разных датчиков. Сначала загружаются данные из каждого датчика параллельно с помощью submit и load_sensor_data. Затем производится обработка данных каждого датчика параллельно с использованием submit и analyze_sensor_data. Результаты выводятся на экран.
+
+
+#скрипт, который параллельно выполняет несколько задач по обработке изображений, таких как изменение размера, применение фильтров и конвертирование форматов.
+def resize_image(image_path, output_path, size):
+    with Image.open(image_path) as image:
+        resized_image = image.resize(size)
+        resized_image.save(output_path)
+
+# Функция для применения фильтра к изображению
+def apply_filter(image_path, output_path, filter_name):
+    with Image.open(image_path) as image:
+        filtered_image = image.filter(filter_name)
+        filtered_image.save(output_path)
+
+# Функция для конвертирования формата изображения
+def convert_image_format(image_path, output_path, format):
+    with Image.open(image_path) as image:
+        image.save(output_path, format)
+
+# Главная функция скрипта
+def main():
+    # Список задач обработки изображений
+    image_tasks = [
+        {
+            'image_path': 'image1.jpg',
+            'output_path': 'resized_image1.jpg',
+            'task_function': resize_image,
+            'task_args': ((800, 600),),
+        },
+        {
+            'image_path': 'image2.jpg',
+            'output_path': 'filtered_image2.jpg',
+            'task_function': apply_filter,
+            'task_args': ('BLUR',),
+        },
+        {
+            'image_path': 'image3.jpg',
+            'output_path': 'converted_image3.png',
+            'task_function': convert_image_format,
+            'task_args': ('PNG',),
+        },
+    ]
+
+    # Создаем пул потоков для параллельного выполнения задач
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        # Выполняем каждую задачу обработки изображения параллельно
+        for task in image_tasks:
+            image_path = task['image_path']
+            output_path = task['output_path']
+            task_function = task['task_function']
+            task_args = task['task_args']
+
+            executor.submit(task_function, image_path, output_path, *task_args)
+
+    print("Задачи по обработке изображений выполнены.")
+
+# Запускаем главную функцию
+if __name__ == '__main__':
+    main()
+
+#В этом примере определены три функции для обработки изображений: resize_image для изменения размера изображения, apply_filter для применения фильтра и convert_image_format для конвертирования формата изображения. Каждая функция принимает путь к входному изображению, путь к выходному изображению и необходимые аргументы для выполнения задачи.
+# Главная функция main создает пул потоков ThreadPoolExecutor, который используется для параллельного выполнения задач по обработке изображений. Задачи представлены в виде словарей, каждый из которых содержит информацию о пути к входному изображению, пути к выходному изображению, функции обработки и аргументах задачи. В цикле каждая задача передается в пул потоков для выполнения с помощью submit.
+
+
+#программу, которая параллельно выполняет вычисления на графическом процессоре (GPU), используя библиотеку CUDA или OpenCL.
+
+# Функция, которая будет выполняться параллельно на GPU
+@cuda.jit
+def parallel_computation(input_array, output_array):
+    # Получаем индекс текущего потока
+    i = cuda.grid(1)
+
+    # Выполняем вычисления
+    if i < input_array.size:
+        output_array[i] = input_array[i] * 2  # Пример простого вычисления
+
+
+# Главная функция программы
+def main():
+    # Создаем входной массив данных
+    input_data = np.array([1, 2, 3, 4, 5], dtype=np.float32)
+
+    # Определяем размерность блока и сетки для запуска вычислений на GPU
+    block_size = 32
+    grid_size = (input_data.size + block_size - 1) // block_size
+
+    # Выделяем память на GPU
+    input_gpu = cuda.to_device(input_data)
+    output_gpu = cuda.device_array_like(input_data)
+
+    # Запускаем параллельные вычисления на GPU
+    parallel_computation[grid_size, block_size](input_gpu, output_gpu)
+
+    # Копируем результат обратно на хост
+    output_data = output_gpu.copy_to_host()
+
+    # Выводим результаты
+    print("Входные данные:", input_data)
+    print("Результаты вычислений:", output_data)
+
+
+# Запускаем главную функцию
+if __name__ == '__main__':
+    main()
+
+#В этом примере используется библиотека numba, которая позволяет использовать JIT-компиляцию для вычислений на GPU с помощью CUDA. Функция parallel_computation аннотирована декоратором cuda.jit, что указывает на необходимость компиляции функции для выполнения на GPU.
+# В главной функции main создается входной массив данных input_data, определяются размерности блока и сетки для запуска вычислений на GPU. Затем память выделяется на GPU с помощью cuda.to_device и cuda.device_array_like. Параллельные вычисления запускаются с использованием [grid_size, block_size] и копируются результаты обратно на хост с помощью copy_to_host.
+
