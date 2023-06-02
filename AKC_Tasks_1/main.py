@@ -2,8 +2,6 @@ import requests
 import threading
 import concurrent.futures
 import multiprocessing
-import re
-from collections import Counter
 
 #Функция, которая параллельно загружает несколько изображений с удаленного сервера и сохраняет их на локальном диске.
 def download_image(url, file_name):
@@ -219,54 +217,3 @@ print("Завершение программы")
 #В этом примере мы используем модуль multiprocessing для создания пула процессов. Функция calculate_formula принимает сложную математическую формулу, вычисляет ее с помощью функции eval и выводит результат.
 # Мы создаем список formulas, в котором содержатся сложные математические формулы для вычисления.Затем мы создаем пул процессов с помощью Pool. Внутри контекста пула процессов мы используем метод map, чтобы параллельно применить функцию calculate_formula ко всем формулам в списке formulas.
 # Результаты будут автоматически собраны и возвращены в том же порядке.Наконец, выводится сообщение "Завершение программы".
-
-#функция, которая параллельно обрабатывает большой объем текстовых данных, разбивая его на отдельные слова и подсчитывая частоту встречаемости каждого слова.
-def process_text(text):
-    # Разбиваем текст на отдельные слова с помощью регулярного выражения
-    words = re.findall(r'\w+', text.lower())
-
-    # Подсчитываем частоту встречаемости каждого слова
-    word_counts = Counter(words)
-
-    return word_counts
-
-def parallel_text_processing(text):
-    # Разбиваем текст на части для обработки параллельно
-    num_processes = multiprocessing.cpu_count()
-    chunk_size = len(text) // num_processes
-    chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
-
-    # Создаем пул процессов
-    with multiprocessing.Pool() as pool:
-        # Обрабатываем каждую часть текста параллельно
-        results = pool.map(process_text, chunks)
-
-    # Объединяем результаты подсчета частоты слов
-    final_word_counts = Counter()
-    for result in results:
-        final_word_counts += result
-
-    return final_word_counts
-
-# Пример использования
-text = """
-Python is a high-level programming language designed to be easy to read and simple to implement.
-It is open source, which means it is free to use, even for commercial purposes.
-Python can run on Mac, Windows, and Unix systems and has also been ported to Java and .NET virtual machines.
-Python is widely used in web development, scientific computing, artificial intelligence, data analysis, and more.
-"""
-
-word_counts = parallel_text_processing(text)
-print("Частота встречаемости слов:")
-for word, count in word_counts.items():
-    print(f"{word}: {count}")
-
-#В этом примере функция process_text принимает текст и разбивает его на отдельные слова с помощью регулярного выражения. Затем она подсчитывает частоту встречаемости каждого слова с использованием Counter.
-# Функция parallel_text_processing разбивает текст на части для параллельной обработки. Она создает пул процессов с помощью Pool и использует метод map, чтобы обработать каждую часть текста параллельно с помощью функции process_text. Результаты обработки объединяются в конечный объект Counter.
-# Пример использования показывает, как передать текст в функцию parallel_text_processing и получить частоту встречаемости каждого слова. Результаты выводятся на экран.
-
-
-
-
-
-
